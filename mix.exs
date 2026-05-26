@@ -69,7 +69,7 @@ defmodule ExSDP.MixProject do
   defp deps do
     [
       {:bunch, "~> 1.3"},
-      {:elixir_uuid, "~> 1.2"},
+      {:uuid, "~> 1.1"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
