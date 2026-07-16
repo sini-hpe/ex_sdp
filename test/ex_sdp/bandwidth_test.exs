@@ -14,6 +14,16 @@ defmodule ExSDP.BandwidthTest do
       assert %Bandwidth{type: :TIAS, bandwidth: 256_000} == result
     end
 
+    test "parse RTCP RS bandwidth modifier (RFC 3556)" do
+      assert {:ok, result} = Bandwidth.parse("RS:600")
+      assert %Bandwidth{type: :RS, bandwidth: 600} == result
+    end
+
+    test "parse RTCP RR bandwidth modifier (RFC 3556)" do
+      assert {:ok, result} = Bandwidth.parse("RR:2000")
+      assert %Bandwidth{type: :RR, bandwidth: 2000} == result
+    end
+
     test "returns error when property is invalid" do
       assert {:error, :invalid_bandwidth} == Bandwidth.parse("gibberish")
     end

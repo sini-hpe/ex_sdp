@@ -127,9 +127,15 @@ defmodule ExSDP.Media do
   end
 
   def parse_optional(["b=" <> bandwidth | rest], %__MODULE__{bandwidth: acc_bandwidth} = media) do
-    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      bandwidth = %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}
-      parse_optional(rest, bandwidth)
+    # Bandwidth is a non-fundamental attribute: skip it if it cannot be
+    # decoded rather than failing the whole media description.
+    case Bandwidth.parse(bandwidth) do
+      {:ok, bandwidth} ->
+        media = %__MODULE__{media | bandwidth: [bandwidth | acc_bandwidth]}
+        parse_optional(rest, media)
+
+      {:error, _reason} ->
+        parse_optional(rest, media)
     end
   end
 
