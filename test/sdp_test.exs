@@ -126,7 +126,7 @@ defmodule ExSDPTest do
       assert result == @expected_output
     end
 
-    test "returns an error with line that crashed parser" do
+    test "skips unknown bandwidth modifier instead of failing" do
       input =
         """
         v=0
@@ -141,7 +141,9 @@ defmodule ExSDPTest do
         """
         |> String.replace("\n", "\r\n")
 
-      assert {:error, {:invalid_bandwidth, "b=X-YZ:256"}} == assert(ExSDP.parse(input))
+      # Unknown/experimental bandwidth modifiers are non-fundamental and are
+      # skipped rather than failing the whole parse.
+      assert {:ok, %ExSDP{bandwidth: []}} = ExSDP.parse(input)
     end
 
     test "returns an error on invalid line" do

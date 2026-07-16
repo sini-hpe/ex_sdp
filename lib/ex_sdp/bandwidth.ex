@@ -15,9 +15,10 @@ defmodule ExSDP.Bandwidth do
           bandwidth: non_neg_integer()
         }
 
-  @type type :: :CT | :AS | :TIAS
+  @type type :: :CT | :AS | :TIAS | :RS | :RR
 
-  @supported_types ["CT", "AS", "TIAS"]
+  # CT/AS/TIAS: RFC 4566 / RFC 3890. RS/RR: RTCP bandwidth modifiers (RFC 3556).
+  @supported_types ["CT", "AS", "TIAS", "RS", "RR"]
 
   @spec parse(binary()) :: {:ok, t()} | {:error, :invalid_bandwidth}
   def parse(bandwidth) do

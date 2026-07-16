@@ -103,8 +103,12 @@ defmodule ExSDP.Parser do
   end
 
   defp parse_line(["b=" <> bandwidth | rest], %ExSDP{bandwidth: acc_bandwidth} = spec) do
-    with {:ok, bandwidth} <- Bandwidth.parse(bandwidth) do
-      {rest, %ExSDP{spec | bandwidth: [bandwidth | acc_bandwidth]}}
+    # Bandwidth is a non-fundamental attribute: if it cannot be decoded
+    # (e.g. an unknown/experimental modifier), skip it rather than failing
+    # the whole SDP parse.
+    case Bandwidth.parse(bandwidth) do
+      {:ok, bandwidth} -> {rest, %ExSDP{spec | bandwidth: [bandwidth | acc_bandwidth]}}
+      {:error, _reason} -> {rest, spec}
     end
   end
 
