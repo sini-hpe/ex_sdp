@@ -309,5 +309,30 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert "#{fmtp}" ==
                "fmtp:97 mode=AAC-hbr;config=121056E500;sizelength=13;indexlength=3;indexdeltalength=3;constantduration=1024"
     end
+
+    test "serializes unknown parameters verbatim" do
+      fmtp = %FMTP{pt: 96, unknown: ["octet-align=1", "mode-set=0,2,5,7"]}
+
+      assert "#{fmtp}" == "fmtp:96 octet-align=1;mode-set=0,2,5,7"
+    end
+
+    test "serializes unknown parameters after the known ones" do
+      fmtp = %FMTP{pt: 108, profile_level_id: 0x42E01F, unknown: ["unsupported-param=1"]}
+
+      assert "#{fmtp}" == "fmtp:108 profile-level-id=42e01f;unsupported-param=1"
+    end
+
+    for params <- [
+          "octet-align=1",
+          "mode-set=0,2,5,7;octet-align=1",
+          "mode-change-capability=2;max-red=0",
+          "br=13.2-24.4;bw=wb;cmr=1",
+          "minptime=10;useinbandfec=1;unknown-param=x"
+        ] do
+      test "round trips #{params}" do
+        {:ok, fmtp} = FMTP.parse("96 #{unquote(params)}")
+        assert "#{fmtp}" == "fmtp:96 #{unquote(params)}"
+      end
+    end
   end
 end

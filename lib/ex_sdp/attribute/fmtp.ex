@@ -568,6 +568,9 @@ defimpl String.Chars, for: ExSDP.Attribute.FMTP do
         Serializer.maybe_serialize("constantduration", fmtp.constantduration),
         Serializer.maybe_serialize("maxdisplacement", fmtp.maxdisplacement)
       ]
+      # Parameters without a dedicated field (AMR octet-align, mode-set, EVS
+      # br, ...) are kept verbatim by the parser and must survive a round trip.
+      |> Kernel.++(fmtp.unknown || [])
       |> Enum.filter(fn param -> param != "" end)
       |> Enum.join(";")
 
