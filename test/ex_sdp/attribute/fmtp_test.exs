@@ -181,6 +181,22 @@ defmodule ExSDP.Attribute.FMTPTest do
       assert {:ok, %{unknown: ["unsupported-param=1"]}} = FMTP.parse(fmtp)
     end
 
+    test "parses fmtp without parameters" do
+      assert {:ok, %FMTP{pt: 102}} == FMTP.parse("102")
+    end
+
+    test "parses fmtp with an empty parameter list" do
+      assert {:ok, %FMTP{pt: 102}} == FMTP.parse("102 ")
+    end
+
+    test "returns an error when fmtp is empty" do
+      assert {:error, :invalid_fmtp} = FMTP.parse("")
+    end
+
+    test "returns an error when fmtp without parameters has an invalid payload type" do
+      assert {:error, :invalid_pt} = FMTP.parse("abc")
+    end
+
     test "parses fmtp with mpeg4-generic" do
       fmtp =
         "97 mode=AAC-hbr;config=121056E500;sizelength=13;indexlength=3;constantduration=1024;indexdeltalength=3"

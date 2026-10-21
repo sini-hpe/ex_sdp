@@ -146,6 +146,40 @@ defmodule ExSDPTest do
       assert {:ok, %ExSDP{bandwidth: []}} = ExSDP.parse(input)
     end
 
+    test "parses a media section with fmtp attributes without parameters" do
+      # Media section of a terminating IMS UE 183 answer (AMR / AMR-WB with a
+      # bare `a=fmtp:<pt>`), with QoS preconditions.
+      input =
+        """
+        v=0
+        o=- 1 1 IN IP4 100.101.2.2
+        s=-
+        c=IN IP4 100.101.2.2
+        t=0 0
+        m=audio 49120 RTP/AVP 0 102 104 101
+        a=rtpmap:0 PCMU/8000
+        a=rtpmap:102 AMR/8000
+        a=fmtp:102
+        a=rtpmap:104 AMR-WB/16000
+        a=fmtp:104
+        a=rtpmap:101 telephone-event/8000
+        a=fmtp:101 0-16
+        a=sendrecv
+        a=conf:qos remote sendrecv
+        """
+        |> String.replace("\n", "\r\n")
+
+      assert {:ok, %ExSDP{media: [media]}} = ExSDP.parse(input)
+
+      assert [
+               %ExSDP.Attribute.FMTP{pt: 102},
+               %ExSDP.Attribute.FMTP{pt: 104},
+               %ExSDP.Attribute.FMTP{pt: 101, dtmf_tones: "0-16"}
+             ] = ExSDP.get_attributes(media, ExSDP.Attribute.FMTP)
+
+      assert {"conf", "qos remote sendrecv"} in media.attributes
+    end
+
     test "returns an error on invalid line" do
       input =
         """
