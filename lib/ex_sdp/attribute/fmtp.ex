@@ -178,9 +178,12 @@ defmodule ExSDP.Attribute.FMTP do
 
   @spec parse(binary()) :: {:ok, t()} | {:error, reason()}
   def parse(fmtp) do
-    withl fmtp: [pt_string, rest] <- String.split(fmtp, " ", parts: 2),
+    withl fmtp: [pt_string | params] when pt_string != "" <- String.split(fmtp, " ", parts: 2),
           pt: {:ok, pt} <- Utils.parse_payload_type(pt_string) do
-      rest
+      # RFC 8866 §6.15 expects parameters after the format, but some endpoints
+      # send a bare `a=fmtp:<fmt>`: read it as a format without parameters.
+      params
+      |> List.first("")
       |> String.split(";")
       # remove leading whitespaces
       |> Enum.map(&String.trim(&1))
